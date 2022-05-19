@@ -19,6 +19,7 @@ async function run() {
     try {
         await client.connect();
         const itemCollection = client.db('dbFurniture').collection('items');
+        const myItemCollection = client.db('dbMyItems').collection('MyItems');
 
         app.get('/inventory', async (req, res) => {
             const query = {};
@@ -30,8 +31,20 @@ async function run() {
             const id = req.params.id;
             console.log(id);
             const query = { _id: ObjectId(id) };
-            const resul = await itemCollection.findOne(query);
-            res.send(resul);
+            const result = await itemCollection.findOne(query);
+            res.send(result);
+        });
+        app.post('/myItems', async (req, res) => {
+            const myItems = req.body;
+            const result = await myItemCollection.insertOne(myItems);
+            res.send(result);
+        });
+        app.get('/myItems', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const cursor = myItemCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result);
         });
     }
     finally {
