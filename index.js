@@ -19,7 +19,6 @@ async function run() {
     try {
         await client.connect();
         const itemCollection = client.db('dbFurniture').collection('items');
-        const myItemCollection = client.db('dbMyItems').collection('MyItems');
 
         app.get('/inventory', async (req, res) => {
             const query = {};
@@ -29,23 +28,44 @@ async function run() {
         });
         app.get('/inventory/:id', async (req, res) => {
             const id = req.params.id;
-            console.log(id);
+            // console.log(id);
             const query = { _id: ObjectId(id) };
             const result = await itemCollection.findOne(query);
             res.send(result);
         });
         app.post('/myItems', async (req, res) => {
             const myItems = req.body;
-            const result = await myItemCollection.insertOne(myItems);
+            const result = await itemCollection.insertOne(myItems);
             res.send(result);
         });
         app.get('/myItems', async (req, res) => {
             const email = req.query.email;
             const query = { email: email };
-            const cursor = myItemCollection.find(query);
+            const cursor = itemCollection.find(query);
             const result = await cursor.toArray();
             res.send(result);
         });
+
+        app.put("/inventory/:id", async (req, res) => {
+            console.log('url hitted')
+            const id = req.params.id;
+            const updateProduct = req.body;
+            const query = { _id: ObjectId(id) };
+            const updated = await itemCollection.updateOne(
+                query,
+                { $set: updateProduct }, // Update
+                { upsert: true } // add document with req.body._id if not exists
+            );
+            const cursor = await itemCollection.findOne(query);
+            res.send(cursor);
+        });
+
+        app.delete('/myItems/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await itemCollection.deleteOne(query);
+            res.send(result);
+        })
     }
     finally {
 
