@@ -40,7 +40,7 @@ async function run() {
         });
         app.get('/myItems', async (req, res) => {
             const email = req.query.email;
-            const query = { email: email };
+            const query = { supplierEmail: email };
             const cursor = itemCollection.find(query);
             const result = await cursor.toArray();
             res.send(result);
@@ -53,14 +53,13 @@ async function run() {
             const query = { _id: ObjectId(id) };
             const updated = await itemCollection.updateOne(
                 query,
-                { $set: updateProduct }, // Update
-                { upsert: true } // add document with req.body._id if not exists
+                { $set: updateProduct },
+                { upsert: true }
             );
             const cursor = await itemCollection.findOne(query);
             res.send(cursor);
         });
-
-        app.delete('/myItems/:id', async (req, res) => {
+        app.delete('/inventory/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const result = await itemCollection.deleteOne(query);
