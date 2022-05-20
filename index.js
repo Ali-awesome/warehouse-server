@@ -20,6 +20,7 @@ async function run() {
         await client.connect();
         const itemCollection = client.db('dbFurniture').collection('items');
 
+        // Main Collections
         app.get('/inventory', async (req, res) => {
             const query = {};
             const cursor = itemCollection.find(query);
@@ -33,6 +34,8 @@ async function run() {
             const result = await itemCollection.findOne(query);
             res.send(result);
         });
+
+        // Myitems Collection
         app.post('/myItems', async (req, res) => {
             const myItems = req.body;
             const result = await itemCollection.insertOne(myItems);
@@ -46,6 +49,7 @@ async function run() {
             res.send(result);
         });
 
+        // Update
         app.put("/inventory/:id", async (req, res) => {
             console.log('url hitted')
             const id = req.params.id;
@@ -59,11 +63,22 @@ async function run() {
             const cursor = await itemCollection.findOne(query);
             res.send(cursor);
         });
+
+        // Deleting Items
         app.delete('/inventory/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const result = await itemCollection.deleteOne(query);
             res.send(result);
+        })
+
+        // Authenticating
+        app.post('/login', async (req, res) => {
+            const user = req.body;
+            const accessToken = jwt.sign(user, process.env.SECRET_KEY, {
+                expiresIn: '1d'
+            });
+            res.send({ accessToken });
         })
     }
     finally {
